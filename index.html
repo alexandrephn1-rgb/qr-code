@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌐 QR Code Online - Versão Gratuita Ilimitada</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header {
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.2em;
+        }
+        
+        .info-box {
+            background: #e8f5e8;
+            border: 2px solid #4CAF50;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .info-box h3 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .qr-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+        
+        .qr-container canvas {
+            max-width: 100%;
+            height: auto;
+            border: 3px solid #ddd;
+            border-radius: 10px;
+        }
+        
+        .timer {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 20px;
+            background: #e8f5e8;
+            border-radius: 15px;
+            border: 3px solid #4CAF50;
+            color: #2e7d32;
+        }
+        
+        .timer.expired {
+            background: #ffcdd2;
+            border-color: #f44336;
+            color: #c62828;
+        }
+        
+        .details {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .details h3 {
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .details p {
+            margin: 8px 0;
+            color: #555;
+        }
+        
+        .details strong {
+            color: #333;
+        }
+        
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .status-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #856404;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .timer {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌐 QR Code Gratuito</h1>
+            <p>Sistema com expiração de 3 minutos</p>
+        </div>
+        
+        <div class="info-box">
+            <h3>🆓 100% GRATUITO E ILIMITADO!</h3>
+            <p><strong>✅ Sem servidor necessário</strong> - Funciona direto no navegador</p>
+            <p><strong>📱 Qualquer dispositivo</strong> - PC, celular, tablet</p>
+            <p><strong>🌐 Qualquer lugar</strong> - Upload em qualquer hosting</p>
+            <p><strong>⏰ Expira em 3 minutos</strong> - Link temporário seguro</p>
+        </div>
+        
+        <button class="btn" id="gerarBtn" onclick="gerarQR()">
+            🔄 GERAR QR CODE
+        </button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Gerando QR Code...</p>
+        </div>
+        
+        <div class="result" id="result">
+            <div class="timer" id="timer">⏰ 3:00</div>
+            
+            <div class="qr-container">
+                <canvas id="qrCanvas"></canvas>
+                <p><strong>👆 Escaneie com qualquer celular</strong></p>
+            </div>
+            
+            <div class="details">
+                <h3>📋 Detalhes do QR Code</h3>
+                <p><strong>🆔 ID:</strong> <span id="qrId">-</span></p>
+                <p><strong>🕐 Criado às:</strong> <span id="criado">-</span></p>
+                <p><strong>⏰ Expira às:</strong> <span id="expira">-</span></p>
+                <p><strong>🎯 Destino:</strong> <span id="destino">Google Forms</span></p>
+                <p><strong>✅ Status:</strong> <span id="status">Ativo por 3 minutos</span></p>
+            </div>
+            
+            <div class="status-box" id="statusBox">
+                <h3>📊 Status do Link:</h3>
+                <p><strong>⚡ Válido:</strong> Link funciona normalmente</p>
+                <p><strong>⏰ Tempo restante:</strong> <span id="tempoRestante">3:00</span></p>
+                <p><strong>🔗 Clique direto:</strong> <a href="#" id="linkDireto" target="_blank">Abrir Google Forms</a></p>
+            </div>
+            
+            <div class="info-box">
+                <h3>🧪 Como testar:</h3>
+                <p><strong>✅ Agora (0-3 min):</strong> Escaneie → Vai para Google Forms</p>
+                <p><strong>❌ Depois (>3 min):</strong> Escaneie → Mostra "Link Expirado"</p>
+                <p><strong>🔄 Novo QR:</strong> Clique no botão "Gerar QR Code" novamente</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>🆓 <strong>Versão Gratuita Ilimitada</strong></p>
+            <p>Funciona sem servidor, sem limites, para sempre!</p>
+            <p>QR Codes expiram automaticamente por segurança</p>
+        </div>
+    </div>
+
+    <script>
+        let timerInterval;
+        let tempoInicio;
+        let linkExpiracao;
+        
+        const LINK_DESTINO = "https://forms.gle/YymKaEzW5n7p4aN98";
+        const TEMPO_EXPIRACAO = 3 * 60 * 1000; // 3 minutos
+        
+        function gerarId() {
+            return Math.random().toString(36).substr(2, 8);
+        }
+        
+        function gerarQR() {
+            console.log('🔄 Gerando QR Code...');
+            
+            const btn = document.getElementById('gerarBtn');
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            
+            // Mostrar loading
+            btn.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            // Simular delay de processamento
+            setTimeout(() => {
+                try {
+                    const agora = Date.now();
+                    const id = gerarId();
+                    tempoInicio = agora;
+                    linkExpiracao = agora + TEMPO_EXPIRACAO;
+                    
+                    // Criar URL única (simulada)
+                    const urlQR = window.location.origin + window.location.pathname + `?qr=${id}&exp=${linkExpiracao}`;
+                    
+                    // Gerar QR Code
+                    const canvas = document.getElementById('qrCanvas');
+                    QRCode.toCanvas(canvas, urlQR, {
+                        width: 300,
+                        margin: 2,
+                        color: {
+                            dark: '#000000',
+                            light: '#FFFFFF'
+                        }
+                    }, function (error) {
+                        if (error) {
+                            console.error('Erro ao gerar QR:', error);
+                            alert('Erro ao gerar QR Code');
+                            btn.disabled = false;
+                            loading.style.display = 'none';
+                            return;
+                        }
+                        
+                        console.log('✅ QR Code gerado com sucesso!');
+                        
+                        // Atualizar elementos
+                        document.getElementById('qrId').textContent = id;
+                        document.getElementById('criado').textContent = new Date().toLocaleTimeString();
+                        document.getElementById('expira').textContent = new Date(linkExpiracao).toLocaleTimeString();
+                        document.getElementById('destino').textContent = LINK_DESTINO;
+                        document.getElementById('status').textContent = 'Ativo por 3 minutos';
+                        document.getElementById('linkDireto').href = LINK_DESTINO;
+                        
+                        // Mostrar resultado
+                        loading.style.display = 'none';
+                        result.style.display = 'block';
+                        btn.disabled = false;
+                        
+                        // Iniciar timer
+                        iniciarTimer();
+                        
+                        console.log('🌐 QR Code funcionando!');
+                    });
+                    
+                } catch (error) {
+                    console.error('❌ Erro:', error);
+                    alert('Erro ao gerar QR Code: ' + error.message);
+                    loading.style.display = 'none';
+                    btn.disabled = false;
+                }
+            }, 1000); // 1 segundo de delay
+        }
+        
+        function iniciarTimer() {
+            const timerElement = document.getElementById('timer');
+            const statusElement = document.getElementById('status');
+            const tempoRestanteElement = document.getElementById('tempoRestante');
+            const statusBox = document.getElementById('statusBox');
+            
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            timerInterval = setInterval(function() {
+                const agora = Date.now();
+                const tempoDecorrido = agora - tempoInicio;
+                const tempoRestante = Math.max(0, TEMPO_EXPIRACAO - tempoDecorrido);
+                
+                if (tempoRestante <= 0) {
+                    // EXPIRADO
+                    timerElement.textContent = '⏰ EXPIRADO!';
+                    timerElement.classList.add('expired');
+                    statusElement.textContent = 'QR Code expirado - Gere um novo!';
+                    tempoRestanteElement.textContent = '0:00';
+                    
+                    statusBox.style.background = '#ffcdd2';
+                    statusBox.style.borderColor = '#f44336';
+                    statusBox.style.color = '#c62828';
+                    statusBox.innerHTML = `
+                        <h3>❌ Link Expirado!</h3>
+                        <p><strong>⚠️ QR Code não funciona mais</strong></p>
+                        <p><strong>🔄 Ação:</strong> Gere um novo QR Code</p>
+                    `;
+                    
+                    console.log('❌ QR Code expirou!');
+                    clearInterval(timerInterval);
+                    return;
+                }
+                
+                // Calcular minutos e segundos
+                const minutos = Math.floor(tempoRestante / 60000);
+                const segundos = Math.floor((tempoRestante % 60000) / 1000);
+                const tempoFormatado = minutos + ':' + segundos.toString().padStart(2, '0');
+                
+                timerElement.textContent = '⏰ ' + tempoFormatado;
+                tempoRestanteElement.textContent = tempoFormatado;
+                
+            }, 1000);
+        }
+        
+        // Verificar se acessou via QR Code
+        function verificarQRCode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const qrId = urlParams.get('qr');
+            const expiracao = urlParams.get('exp');
+            
+            if (qrId && expiracao) {
+                const agora = Date.now();
+                const exp = parseInt(expiracao);
+                
+                if (agora > exp) {
+                    // Expirado
+                    document.body.innerHTML = `
+                        <div style="background: #f44336; color: white; padding: 50px; text-align: center; font-family: Arial; min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+                            <div style="background: white; color: #333; padding: 40px; border-radius: 20px; max-width: 500px;">
+                                <h1 style="color: #f44336;">❌ Link Expirado!</h1>
+                                <p style="font-size: 1.2em; margin: 20px 0;">Este QR Code não é mais válido</p>
+                                <div style="background: #ffebee; border: 2px solid #ffcdd2; border-radius: 15px; padding: 20px; margin: 20px 0;">
+                                    <p><strong>🆔 ID:</strong> ${qrId}</p>
+                                    <p><strong>⏰ Validade:</strong> 3 minutos</p>
+                                    <p><strong>🕐 Status:</strong> Expirado</p>
+                                </div>
+                                <p style="margin: 20px 0;">🔄 <strong>Gere um novo QR Code para continuar</strong></p>
+                                <a href="${window.location.origin}${window.location.pathname}" style="background: #4CAF50; color: white; padding: 15px 30px; border-radius: 50px; text-decoration: none; display: inline-block; margin-top: 20px;">🔄 Gerar Novo QR Code</a>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Válido - redirecionar
+                    console.log('✅ QR Code válido - Redirecionando...');
+                    window.location.href = LINK_DESTINO;
+                }
+            }
+        }
+        
+        // Executar verificação ao carregar
+        verificarQRCode();
+        
+        console.log('🚀 Sistema QR Code Gratuito carregado!');
+        console.log('🆓 Versão ilimitada - sem servidor necessário');
+    </script>
+</body>
+</html>
