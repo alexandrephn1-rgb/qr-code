@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌐 QR Code Online - Versão Gratuita Ilimitada</title>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <title>🌐 QR Code Online - Sistema Gratuito</title>
     <style>
         * {
             margin: 0;
@@ -99,11 +98,12 @@
             margin: 20px 0;
         }
         
-        .qr-container canvas {
+        .qr-display {
             max-width: 100%;
             height: auto;
             border: 3px solid #ddd;
             border-radius: 10px;
+            margin: 20px 0;
         }
         
         .timer {
@@ -183,6 +183,22 @@
             color: #856404;
         }
         
+        .direct-link {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .direct-link:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+        
         @media (max-width: 600px) {
             .container {
                 padding: 20px;
@@ -210,7 +226,7 @@
             <h3>🆓 100% GRATUITO E ILIMITADO!</h3>
             <p><strong>✅ Sem servidor necessário</strong> - Funciona direto no navegador</p>
             <p><strong>📱 Qualquer dispositivo</strong> - PC, celular, tablet</p>
-            <p><strong>🌐 Qualquer lugar</strong> - Upload em qualquer hosting</p>
+            <p><strong>🌐 Funciona globalmente</strong> - Acesse de qualquer lugar</p>
             <p><strong>⏰ Expira em 3 minutos</strong> - Link temporário seguro</p>
         </div>
         
@@ -227,7 +243,7 @@
             <div class="timer" id="timer">⏰ 3:00</div>
             
             <div class="qr-container">
-                <canvas id="qrCanvas"></canvas>
+                <img id="qrImage" class="qr-display" alt="QR Code">
                 <p><strong>👆 Escaneie com qualquer celular</strong></p>
             </div>
             
@@ -244,7 +260,7 @@
                 <h3>📊 Status do Link:</h3>
                 <p><strong>⚡ Válido:</strong> Link funciona normalmente</p>
                 <p><strong>⏰ Tempo restante:</strong> <span id="tempoRestante">3:00</span></p>
-                <p><strong>🔗 Clique direto:</strong> <a href="#" id="linkDireto" target="_blank">Abrir Google Forms</a></p>
+                <p><strong>🔗 Acesso direto:</strong> <a href="https://forms.gle/YymKaEzW5n7p4aN98" target="_blank" class="direct-link">Abrir Google Forms</a></p>
             </div>
             
             <div class="info-box">
@@ -262,7 +278,39 @@
         </div>
     </div>
 
+    <!-- Biblioteca QR Code com fallback -->
     <script>
+        // Múltiplas tentativas de carregar biblioteca QR
+        let qrLibLoaded = false;
+        
+        function loadQRLibrary() {
+            return new Promise((resolve, reject) => {
+                // Tentar carregar biblioteca principal
+                const script1 = document.createElement('script');
+                script1.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
+                script1.onload = () => {
+                    qrLibLoaded = true;
+                    resolve(true);
+                };
+                script1.onerror = () => {
+                    // Fallback 1
+                    const script2 = document.createElement('script');
+                    script2.src = 'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js';
+                    script2.onload = () => {
+                        qrLibLoaded = true;
+                        resolve(true);
+                    };
+                    script2.onerror = () => {
+                        // Fallback 2 - usar API online
+                        resolve(false);
+                    };
+                    document.head.appendChild(script2);
+                };
+                document.head.appendChild(script1);
+            });
+        }
+        
+        // Variáveis globais
         let timerInterval;
         let tempoInicio;
         let linkExpiracao;
@@ -274,7 +322,13 @@
             return Math.random().toString(36).substr(2, 8);
         }
         
-        function gerarQR() {
+        async function gerarQRCodeAPI(texto) {
+            // Usar API online como fallback
+            const url = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(texto)}`;
+            return url;
+        }
+        
+        async function gerarQR() {
             console.log('🔄 Gerando QR Code...');
             
             const btn = document.getElementById('gerarBtn');
@@ -286,63 +340,71 @@
             loading.style.display = 'block';
             result.style.display = 'none';
             
-            // Simular delay de processamento
-            setTimeout(() => {
-                try {
-                    const agora = Date.now();
-                    const id = gerarId();
-                    tempoInicio = agora;
-                    linkExpiracao = agora + TEMPO_EXPIRACAO;
-                    
-                    // Criar URL única (simulada)
-                    const urlQR = window.location.origin + window.location.pathname + `?qr=${id}&exp=${linkExpiracao}`;
-                    
-                    // Gerar QR Code
-                    const canvas = document.getElementById('qrCanvas');
-                    QRCode.toCanvas(canvas, urlQR, {
-                        width: 300,
-                        margin: 2,
-                        color: {
-                            dark: '#000000',
-                            light: '#FFFFFF'
-                        }
-                    }, function (error) {
-                        if (error) {
-                            console.error('Erro ao gerar QR:', error);
-                            alert('Erro ao gerar QR Code');
-                            btn.disabled = false;
-                            loading.style.display = 'none';
-                            return;
-                        }
-                        
-                        console.log('✅ QR Code gerado com sucesso!');
-                        
-                        // Atualizar elementos
-                        document.getElementById('qrId').textContent = id;
-                        document.getElementById('criado').textContent = new Date().toLocaleTimeString();
-                        document.getElementById('expira').textContent = new Date(linkExpiracao).toLocaleTimeString();
-                        document.getElementById('destino').textContent = LINK_DESTINO;
-                        document.getElementById('status').textContent = 'Ativo por 3 minutos';
-                        document.getElementById('linkDireto').href = LINK_DESTINO;
-                        
-                        // Mostrar resultado
-                        loading.style.display = 'none';
-                        result.style.display = 'block';
-                        btn.disabled = false;
-                        
-                        // Iniciar timer
-                        iniciarTimer();
-                        
-                        console.log('🌐 QR Code funcionando!');
-                    });
-                    
-                } catch (error) {
-                    console.error('❌ Erro:', error);
-                    alert('Erro ao gerar QR Code: ' + error.message);
-                    loading.style.display = 'none';
-                    btn.disabled = false;
+            try {
+                // Carregar biblioteca se necessário
+                if (!qrLibLoaded) {
+                    await loadQRLibrary();
                 }
-            }, 1000); // 1 segundo de delay
+                
+                const agora = Date.now();
+                const id = gerarId();
+                tempoInicio = agora;
+                linkExpiracao = agora + TEMPO_EXPIRACAO;
+                
+                // Criar URL única (simulada)
+                const urlQR = window.location.origin + window.location.pathname + `?qr=${id}&exp=${linkExpiracao}`;
+                
+                // Gerar QR Code
+                let qrImageSrc;
+                
+                if (qrLibLoaded && typeof QRCode !== 'undefined') {
+                    // Usar biblioteca local
+                    try {
+                        const canvas = document.createElement('canvas');
+                        await QRCode.toCanvas(canvas, urlQR, {
+                            width: 300,
+                            margin: 2,
+                            color: {
+                                dark: '#000000',
+                                light: '#FFFFFF'
+                            }
+                        });
+                        qrImageSrc = canvas.toDataURL();
+                    } catch (e) {
+                        // Fallback para API
+                        qrImageSrc = await gerarQRCodeAPI(urlQR);
+                    }
+                } else {
+                    // Usar API online
+                    qrImageSrc = await gerarQRCodeAPI(urlQR);
+                }
+                
+                console.log('✅ QR Code gerado com sucesso!');
+                
+                // Atualizar elementos
+                document.getElementById('qrImage').src = qrImageSrc;
+                document.getElementById('qrId').textContent = id;
+                document.getElementById('criado').textContent = new Date().toLocaleTimeString();
+                document.getElementById('expira').textContent = new Date(linkExpiracao).toLocaleTimeString();
+                document.getElementById('destino').textContent = LINK_DESTINO;
+                document.getElementById('status').textContent = 'Ativo por 3 minutos';
+                
+                // Mostrar resultado
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                btn.disabled = false;
+                
+                // Iniciar timer
+                iniciarTimer();
+                
+                console.log('🌐 QR Code funcionando globalmente!');
+                
+            } catch (error) {
+                console.error('❌ Erro:', error);
+                alert('Erro ao gerar QR Code. Tente novamente.');
+                loading.style.display = 'none';
+                btn.disabled = false;
+            }
         }
         
         function iniciarTimer() {
@@ -374,6 +436,7 @@
                         <h3>❌ Link Expirado!</h3>
                         <p><strong>⚠️ QR Code não funciona mais</strong></p>
                         <p><strong>🔄 Ação:</strong> Gere um novo QR Code</p>
+                        <a href="https://forms.gle/YymKaEzW5n7p4aN98" target="_blank" class="direct-link">🔗 Acesso Direto ao Forms</a>
                     `;
                     
                     console.log('❌ QR Code expirou!');
@@ -405,9 +468,10 @@
                 if (agora > exp) {
                     // Expirado
                     document.body.innerHTML = `
-                        <div style="background: #f44336; color: white; padding: 50px; text-align: center; font-family: Arial; min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+                        <div style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%); color: white; padding: 50px; text-align: center; font-family: Arial; min-height: 100vh; display: flex; align-items: center; justify-content: center;">
                             <div style="background: white; color: #333; padding: 40px; border-radius: 20px; max-width: 500px;">
-                                <h1 style="color: #f44336;">❌ Link Expirado!</h1>
+                                <div style="font-size: 4em; margin-bottom: 20px;">⏰</div>
+                                <h1 style="color: #f44336; margin-bottom: 20px;">Link Expirado!</h1>
                                 <p style="font-size: 1.2em; margin: 20px 0;">Este QR Code não é mais válido</p>
                                 <div style="background: #ffebee; border: 2px solid #ffcdd2; border-radius: 15px; padding: 20px; margin: 20px 0;">
                                     <p><strong>🆔 ID:</strong> ${qrId}</p>
@@ -415,7 +479,8 @@
                                     <p><strong>🕐 Status:</strong> Expirado</p>
                                 </div>
                                 <p style="margin: 20px 0;">🔄 <strong>Gere um novo QR Code para continuar</strong></p>
-                                <a href="${window.location.origin}${window.location.pathname}" style="background: #4CAF50; color: white; padding: 15px 30px; border-radius: 50px; text-decoration: none; display: inline-block; margin-top: 20px;">🔄 Gerar Novo QR Code</a>
+                                <a href="${window.location.origin}${window.location.pathname}" style="background: #4CAF50; color: white; padding: 15px 30px; border-radius: 50px; text-decoration: none; display: inline-block; margin: 10px;">🔄 Gerar Novo QR Code</a>
+                                <a href="https://forms.gle/YymKaEzW5n7p4aN98" target="_blank" style="background: #007bff; color: white; padding: 15px 30px; border-radius: 50px; text-decoration: none; display: inline-block; margin: 10px;">🔗 Acesso Direto ao Forms</a>
                             </div>
                         </div>
                     `;
@@ -427,11 +492,18 @@
             }
         }
         
-        // Executar verificação ao carregar
-        verificarQRCode();
+        // Executar ao carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            verificarQRCode();
+            loadQRLibrary().then(() => {
+                console.log('📱 Biblioteca QR carregada!');
+            }).catch(() => {
+                console.log('📱 Usando API online como fallback');
+            });
+        });
         
         console.log('🚀 Sistema QR Code Gratuito carregado!');
-        console.log('🆓 Versão ilimitada - sem servidor necessário');
+        console.log('🆓 Versão ilimitada com múltiplos fallbacks');
     </script>
 </body>
 </html>
